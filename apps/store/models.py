@@ -67,7 +67,7 @@ class Category(models.Model):
     slug = models.SlugField(help_text =_('Category safe URL'), max_length=255, unique=True)
     category_sku = models.CharField(verbose_name=_("Category SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
     ordering = models.IntegerField(default=0)
-    is_featured = models.BooleanField(default=True)
+    # is_featured = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = _('Category')
@@ -92,9 +92,9 @@ class Product(ProductImage):
     price = models.DecimalField(verbose_name=_('Base Price'), help_text=_('Maximum 9999999.99'), error_messages={
             'name': {
                 'max_length': _('The price must be between 0 and 9999999.99'),},}, max_digits=9, decimal_places=2)
-    promotional_price = models.DecimalField(verbose_name=_('Promotional Price'), help_text=_('Maximum 9999999.99'), error_messages={
-            'name': {
-                'max_length': _('The price must be between 0 and 9999999.99'),},}, max_digits=9, decimal_places=2, blank=True, null=True)
+    # promotional_price = models.DecimalField(verbose_name=_('Promotional Price'), help_text=_('Maximum 9999999.99'), error_messages={
+    #         'name': {
+    #             'max_length': _('The price must be between 0 and 9999999.99'),},}, max_digits=9, decimal_places=2, blank=True, null=True)
     is_featured = models.BooleanField(default=False)
     num_available = models.IntegerField(default=1)
     num_visits = models.IntegerField(default=0)

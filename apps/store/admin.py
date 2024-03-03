@@ -7,6 +7,10 @@ admin.site.register(Product)
 admin.site.register(VariationCategory)
 admin.site.register(VariationOption)
 admin.site.register(VariationSpecification)
+admin.site.register(ProductReview)
+
+
+
+
 # admin.site.register(Customization)
 # admin.site.register(ProductVariation)
-admin.site.register(ProductReview)

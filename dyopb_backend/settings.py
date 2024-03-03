@@ -62,22 +62,16 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'djoser',
     'stripe',
     'mptt',
 
+    # 'apps.core',
     'apps.cart',
     'apps.coupon',
-    'apps.core',
     'apps.newsletter',
     'apps.order',
     'apps.store',
     'apps.userprofile'
-]
-
-CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:8000',
-    'http://localhost:5173',
 ]
 
 MIDDLEWARE = [
@@ -90,6 +84,27 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication'],
+
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
+
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+
+    # 'PAGE_SIZE': 1,
+
+}
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+
+# CORS_ALLOWED_ORIGINS = [
+#     'http://127.0.0.1:8000',
+#     'http://localhost:5173',
+# ]
 
 ROOT_URLCONF = 'dyopb_backend.urls'
 
@@ -149,7 +164,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/New_York'
 
 USE_I18N = True
 

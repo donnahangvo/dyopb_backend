@@ -21,53 +21,74 @@ from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 from django.contrib.auth import views
 
-from apps.cart.webhook import webhook
-from apps.cart.views import cart_detail, success
-from apps.core.views import frontpage, contact, about
-from apps.order.views import admin_order_pdf
-from apps.store.views import product_detail, category_detail, search
-from apps.userprofile.views import signup, myaccount
-
-from apps.newsletter.api import api_add_subscriber
-from apps.coupon.api import api_can_use
-from apps.store.api import api_add_to_cart, api_remove_from_cart, create_checkout_session
 
 from .sitemaps import StaticViewSitemap, CategorySitemap, ProductSitemap
 
 sitemaps = {'static': StaticViewSitemap, 'product': ProductSitemap, 'category': CategorySitemap}
 
 urlpatterns = [
-    path('', frontpage, name='frontpage'),
-    path('search/', search, name='search'),
-    path('cart/', cart_detail, name='cart'),
-    path('hooks/', webhook, name='webhook'),
-    path('cart/success/', success, name='success'),
-    path('contact/', contact, name='contact'),
-    path('about/', about, name='about'),
     path('admin/', admin.site.urls),
-    path('admin/admin_order_pdf/<int:order_id>/', admin_order_pdf, name='admin_order_pdf'),
+    path('admin/admin_order_pdf/<int:order_id>/', include('apps.order.api.urls')),
 
     # Auth
 
-    path('myaccount/', myaccount, name='myaccount'),
-    path('signup/', signup, name='signup'),
-    path('login/', views.LoginView.as_view(template_name='login.html'), name='login'),
-    path('logout/', views.LogoutView.as_view(), name='logout'),
-
+    path('api/signup/', include('apps.userprofile.api.urls')),
+    path('api/login/', include('apps.userprofile.api.urls')),
+    path('api/logout/', include('apps.userprofile.api.urls')),
+    path('api/myaccount/', include('apps.userprofile.api.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 
-    # API
+    # Cart and Orders
 
-    path('api/can_use/', api_can_use, name='api_can_use'),
-    path('api/create_checkout_session/', create_checkout_session, name='create_checkout_session'),
-    path('api/add_to_cart/', api_add_to_cart, name='api_add_to_cart'),
-    path('api/remove_from_cart/', api_remove_from_cart, name='api_remove_from_cart'),
-    path('api/add_subscriber/', api_add_subscriber, name='api_add_subscriber'),
+    path('api/coupon/', include('apps.coupon.api.urls')),
+    path('api/newsletter/', include('apps.newsletter.api.urls')),
+
+    path('api/checkout/', include('apps.order.api.urls')),
+    path('api/cart/', include('apps.cart.api.urls')),
+    path('api/cart/add/<int:product_id>/', include('apps.cart.api.urls')),
+    path('api/cart/remove/<int:product_id>/', include('apps.cart.api.urls')),
+    path('api/cart/detail/', include('apps.cart.api.urls')),
+    path('api/cart/success/', include('apps.cart.api.urls')),
+    path('api/webhook/', include('apps.cart.api.urls')),
 
     # Store
 
-    path('api/', include('djoser.urls')),
-    path('api/', include('djoser.urls.authtoken')),
-    path('<slug:category_slug>/<slug:slug>/', product_detail, name='product_detail'),
-    path('<slug:slug>/', category_detail, name='category_detail'),
+    path('api/search/', include('apps.store.api.urls')),
+    path('api/variations/', include('apps.store.api.urls')),
+    path('api/options/', include('apps.store.api.urls')),
+    path('api/specifications/', include('apps.store.api.urls')),
+    path('api/products/<str:category_slug>/<str:slug>/', include('apps.store.api.urls')),
+    path('api/categories/<str:slug>/', include('apps.store.api.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+
+
+    # path('', frontpage, name='frontpage'),
+    # path('cart/', cart_detail, name='cart'),
+    # path('hooks/', webhook, name='webhook'),
+    # path('cart/success/', success, name='success'),
+    # path('contact/', contact, name='contact'),
+    # path('about/', about, name='about'),
+    # path('admin/', admin.site.urls),
+    # path('admin/admin_order_pdf/<int:order_id>/', admin_order_pdf, name='admin_order_pdf'),
+
+    # # Auth
+
+    # path('myaccount/', myaccount, name='myaccount'),
+    # path('signup/', signup, name='signup'),
+    # path('login/', views.LoginView.as_view(template_name='login.html'), name='login'),
+    # path('logout/', views.LogoutView.as_view(), name='logout'),
+    # path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+
+    # # API
+
+    # path('api/can_use/', api_can_use, name='api_can_use'),
+    # path('api/create_checkout_session/', create_checkout_session, name='create_checkout_session'),
+    # path('api/add_to_cart/', api_add_to_cart, name='api_add_to_cart'),
+    # path('api/remove_from_cart/', api_remove_from_cart, name='api_remove_from_cart'),
+    # path('api/add_subscriber/', api_add_subscriber, name='api_add_subscriber'),
+
+    # path('search/', search, name='search'),
+    # path('<slug:category_slug>/<slug:slug>/', product_detail, name='product_detail'),
+    # path('<slug:slug>/', category_detail, name='category_detail'),
