@@ -31,4 +31,4 @@ class OptionSerializer(serializers.ModelSerializer):
 class SpecificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationSpecification
-        fields = ('title', 'specification_sku', 'image', 'thumbnail')
+        fields = ('title', 'specification_sku', 'description', 'image', 'thumbnail')

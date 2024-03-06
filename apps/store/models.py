@@ -9,7 +9,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
 
-
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+import os
 
 # Product Image Model for Image and Thumbnail
 
@@ -17,7 +19,7 @@ class ProductImage(models.Model):
     image = models.ImageField(verbose_name=_('Image'), help_text=_('Upload product image'), upload_to='product_images/', blank=True, null=True)
     thumbnail = models.ImageField(upload_to='uploads/', blank=True, null=True)
     alt_text = models.CharField(verbose_name=_('Alternative text'), help_text=_('Add alternative text'), max_length=255, blank=True, null=True)
-    is_feature = models.BooleanField(default=False)
+    # is_feature = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -54,11 +56,28 @@ class ProductImage(models.Model):
         img.thumbnail(thumbnail_size)
 
         thumb_io = BytesIO()
-        img.save(thumb_io, 'JPEG', quality=85)
+        img_format = self.image.name.split('.')[-1].upper()  # Extract file extension
+        img.save(thumb_io, img_format, quality=85)
 
         thumbnail = File(thumb_io, name=self.image.name)
 
         return thumbnail
+    
+    def delete(self, *args, **kwargs):
+        # Delete image files before deleting the instance
+        storage, path = self.image.storage, self.image.path
+        storage.delete(path)
+        if self.thumbnail:
+            thumb_storage, thumb_path = self.thumbnail.storage, self.thumbnail.path
+            thumb_storage.delete(thumb_path)
+        super().delete(*args, **kwargs)
+
+@receiver(pre_delete, sender=ProductImage)
+def product_image_delete(sender, instance, **kwargs):
+    # Before deleting the instance, delete the associated image files
+    instance.image.delete(False)
+    if instance.thumbnail:
+        instance.thumbnail.delete(False)
 
 # Category Model
 class Category(models.Model):
@@ -66,8 +85,8 @@ class Category(models.Model):
     title = models.CharField(help_text =_('Required and unique'), max_length=255, unique=True)
     slug = models.SlugField(help_text =_('Category safe URL'), max_length=255, unique=True)
     category_sku = models.CharField(verbose_name=_("Category SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
+    is_featured = models.BooleanField(default=False)
     ordering = models.IntegerField(default=0)
-    # is_featured = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = _('Category')
@@ -88,7 +107,7 @@ class Product(ProductImage):
     title = models.CharField(help_text=_('Featured product name'), max_length=255, unique=True)
     slug = models.SlugField(help_text=_('Category safe URL'), max_length=255, unique=True)
     product_sku = models.CharField(verbose_name=_("Product SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
-    description = models.TextField(verbose_name=_('Description'),help_text=_('Not Required'), max_length=10000, unique=True, blank=True, null=True)
+    description = models.TextField(verbose_name=_('Description'),help_text=_('Not Required'), max_length=10000, blank=True, null=True)
     price = models.DecimalField(verbose_name=_('Base Price'), help_text=_('Maximum 9999999.99'), error_messages={
             'name': {
                 'max_length': _('The price must be between 0 and 9999999.99'),},}, max_digits=9, decimal_places=2)
@@ -96,7 +115,7 @@ class Product(ProductImage):
     #         'name': {
     #             'max_length': _('The price must be between 0 and 9999999.99'),},}, max_digits=9, decimal_places=2, blank=True, null=True)
     is_featured = models.BooleanField(default=False)
-    num_available = models.IntegerField(default=1)
+    # num_available = models.IntegerField(default=1)
     num_visits = models.IntegerField(default=0)
     last_visit = models.DateTimeField(blank=True, null=True)
     image = models.ImageField(upload_to='uploads/', blank=True, null=True)
@@ -122,13 +141,20 @@ class Product(ProductImage):
             return 0
 
 # Product Variation Models
-class VariationCategory(models.Model):
+class VariationCategory(MPTTModel):
     variation = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variations')
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     # parent = models.ForeignKey('self', related_name='variants', on_delete=models.CASCADE, blank=True, null=True)
     title = models.CharField(help_text=_('Variation Categories - Required if there are options'), max_length=255, unique=True)
     slug = models.SlugField(help_text=_('Category safe URL'), max_length=255, unique=True)
     variation_sku = models.CharField(verbose_name=_("Variation SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
+    level = models.PositiveIntegerField(default=0)  # Provide a default value for the level field
+    lft = models.PositiveIntegerField(default=0)  # Provide a default value for the lft field
+    rght = models.PositiveIntegerField(default=0)  # Provide a default value for the rght field
+    tree_id = models.PositiveIntegerField(default=0)  # Add default value for tree_id
 
+    class MPTTMeta:
+        order_insertion_by = ['name']
 
     class Meta:
         verbose_name = _('Variation')
@@ -169,6 +195,8 @@ class VariationSpecification(ProductImage, MPTTModel):
     title = models.CharField(help_text=_('Variation Specifications - not required'), max_length=255, unique=True)
     slug = models.SlugField(help_text=_('Category safe URL'), max_length=255, unique=True)
     specification_sku = models.CharField(verbose_name=_("Specification SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
+    description = models.TextField(verbose_name=_('Description'),help_text=_('Not Required'), max_length=10000, blank=True, null=True)
+    num_available = models.IntegerField(default=1)
     image = models.ImageField(upload_to='uploads/', blank=True, null=True)
     thumbnail = models.ImageField(upload_to='uploads/', blank=True, null=True)   
 
@@ -184,6 +212,27 @@ class VariationSpecification(ProductImage, MPTTModel):
     
     def get_absolute_url(self):
         return '/%s/%s/' % (self.specification.slug, self.slug)
+
+    
+class ProductReview(models.Model):
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='reviews', on_delete=models.CASCADE)
+
+    content = models.TextField(blank=True, null=True)
+    stars = models.IntegerField()
+
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Product Review')
+        verbose_name_plural = _('Product Reviews')
+
+
+
+
+
+
+
 
 # class Customization(models.Model):
 #     custom = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='customizations')
@@ -212,16 +261,3 @@ class VariationSpecification(ProductImage, MPTTModel):
 
 #     def __str__(self):
 #         return f"{self.product.title} - {self.variation_category.title} - {self.variation_option.title} - {self.variation_specifcation.title} - {self.customization.title}"
-    
-class ProductReview(models.Model):
-    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
-    user = models.ForeignKey(User, related_name='reviews', on_delete=models.CASCADE)
-
-    content = models.TextField(blank=True, null=True)
-    stars = models.IntegerField()
-
-    date_added = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = _('Product Review')
-        verbose_name_plural = _('Product Reviews')

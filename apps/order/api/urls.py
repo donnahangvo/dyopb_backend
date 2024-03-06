@@ -3,7 +3,7 @@ from apps.order.utils import checkout
 from apps.order.api.views import admin_order_pdf
 
 
-app_name = 'order'
+# app_name = 'order'
 
 urlpatterns = [
     path('checkout', checkout, name='checkout'),
