@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'stripe',
     'mptt',
+    'ckeditor',
 
     # 'apps.core',
     'apps.cart',
@@ -73,6 +74,14 @@ INSTALLED_APPS = [
     'apps.store',
     'apps.userprofile'
 ]
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'full',
+        'height': 300,
+        'width': 800,
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

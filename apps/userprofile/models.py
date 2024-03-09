@@ -17,10 +17,6 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
-    # class Meta:
-    #     verbose_name = _('User')
-    #     verbose_name_plural = _('Users')
 
     def create_superuser(self, email, username, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)

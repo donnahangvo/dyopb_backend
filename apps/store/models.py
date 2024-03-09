@@ -13,13 +13,12 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 import os
 
-# Product Image Model for Image and Thumbnail
+# Product Image Model for Images and Thumbnails
 
 class ProductImage(models.Model):
     image = models.ImageField(verbose_name=_('Image'), help_text=_('Upload product image'), upload_to='product_images/', blank=True, null=True)
-    thumbnail = models.ImageField(upload_to='uploads/', blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='uploads/', help_text=_('Automatically generated, do not need to upload'), blank=True, null=True)
     alt_text = models.CharField(verbose_name=_('Alternative text'), help_text=_('Add alternative text'), max_length=255, blank=True, null=True)
-    # is_feature = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -49,17 +48,36 @@ class ProductImage(models.Model):
             else:
                 return ''
 
-    def make_thumbnail(self, size=(300, 200)):
-        img = Image.open(self.image)
+    def make_thumbnail(self, image):
+        if not image:
+            return None
+
+        img_format = image.name.split('.')[-1].upper()  # Extract file extension
+
+        if img_format == 'SVG':
+            # No need to resize SVG images, return the original image
+            return image
+
+        img = Image.open(image)
         img.convert('RGB')
         thumbnail_size = (300, 200)
         img.thumbnail(thumbnail_size)
 
         thumb_io = BytesIO()
-        img_format = self.image.name.split('.')[-1].upper()  # Extract file extension
-        img.save(thumb_io, img_format, quality=85)
 
-        thumbnail = File(thumb_io, name=self.image.name)
+        # Map file extensions to PIL formats
+        pil_formats = {
+            'JPG': 'JPEG',
+            'JPEG': 'JPEG',
+            'PNG': 'PNG',
+            # Add more mappings if necessary
+        }
+
+        pil_format = pil_formats.get(img_format, '.PNG')  # Default to .PNG if format is not recognized
+
+        img.save(thumb_io, pil_format, quality=85)
+
+        thumbnail = File(thumb_io, name=image.name)
 
         return thumbnail
     
@@ -119,7 +137,7 @@ class Product(ProductImage):
     num_visits = models.IntegerField(default=0)
     last_visit = models.DateTimeField(blank=True, null=True)
     image = models.ImageField(upload_to='uploads/', blank=True, null=True)
-    thumbnail = models.ImageField(upload_to='uploads/', blank=True, null=True)   
+    thumbnail = models.ImageField(upload_to='uploads/', help_text=_('Automatically generated, do not need to upload'), blank=True, null=True)   
     created = models.DateTimeField(_('Created on'), auto_now_add=True,editable=False)
     updated = models.DateTimeField(_('Updated on'), auto_now=True)
 
@@ -145,7 +163,7 @@ class VariationCategory(MPTTModel):
     variation = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variations')
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     # parent = models.ForeignKey('self', related_name='variants', on_delete=models.CASCADE, blank=True, null=True)
-    title = models.CharField(help_text=_('Variation Categories - Required if there are options'), max_length=255, unique=True)
+    name = models.CharField(help_text=_('Variation Categories - Required if there are options'), max_length=255, unique=True)
     slug = models.SlugField(help_text=_('Category safe URL'), max_length=255, unique=True)
     variation_sku = models.CharField(verbose_name=_("Variation SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
     level = models.PositiveIntegerField(default=0)  # Provide a default value for the level field
@@ -162,7 +180,7 @@ class VariationCategory(MPTTModel):
 
 
     def __str__(self):
-        return self.title
+        return self.name
     
     def get_absolute_url(self):
         return '/%s/%s/' % (self.variation.slug, self.slug)
@@ -170,11 +188,11 @@ class VariationCategory(MPTTModel):
 class VariationOption(ProductImage, MPTTModel):
     option = models.ForeignKey(VariationCategory, on_delete=models.CASCADE, related_name='options')
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
-    title = models.CharField(help_text=_('Variation Option - not required'), max_length=255, unique=True)
+    name = models.CharField(help_text=_('Variation Option - not required'), max_length=255, unique=True)
     slug = models.SlugField(help_text=_('Category safe URL'), max_length=255, unique=True)
     option_sku = models.CharField(verbose_name=_("Option SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
     image = models.ImageField(upload_to='uploads/', blank=True, null=True)
-    thumbnail = models.ImageField(upload_to='uploads/', blank=True, null=True)   
+    thumbnail = models.ImageField(upload_to='uploads/', help_text=_('Automatically generated, do not need to upload'), blank=True, null=True)   
 
     class MPTTMeta:
         order_insertion_by = ['level']
@@ -184,7 +202,7 @@ class VariationOption(ProductImage, MPTTModel):
         verbose_name_plural = _('Options')
 
     def __str__(self):
-        return self.title
+        return self.name
     
     def get_absolute_url(self):
         return f'/{self.option.slug}/{self.slug}/'
@@ -192,13 +210,14 @@ class VariationOption(ProductImage, MPTTModel):
 class VariationSpecification(ProductImage, MPTTModel):
     specification = models.ForeignKey(VariationOption, on_delete=models.CASCADE, related_name='specifications')
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
-    title = models.CharField(help_text=_('Variation Specifications - not required'), max_length=255, unique=True)
+    name = models.CharField(help_text=_('Variation Specifications - not required'), max_length=255, unique=True)
     slug = models.SlugField(help_text=_('Category safe URL'), max_length=255, unique=True)
     specification_sku = models.CharField(verbose_name=_("Specification SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
     description = models.TextField(verbose_name=_('Description'),help_text=_('Not Required'), max_length=10000, blank=True, null=True)
-    num_available = models.IntegerField(default=1)
+    num_available = models.IntegerField(default=None, null=True, blank=True)
+    is_featured = models.BooleanField(default=True)
     image = models.ImageField(upload_to='uploads/', blank=True, null=True)
-    thumbnail = models.ImageField(upload_to='uploads/', blank=True, null=True)   
+    thumbnail = models.ImageField(upload_to='uploads/', help_text=_('Automatically generated, do not need to upload'), blank=True, null=True)   
 
     class MPTTMeta:
         order_insertion_by = ['level']
@@ -208,7 +227,7 @@ class VariationSpecification(ProductImage, MPTTModel):
         verbose_name_plural = _('Specifications')
 
     def __str__(self):
-        return self.title
+        return self.name
     
     def get_absolute_url(self):
         return '/%s/%s/' % (self.specification.slug, self.slug)
