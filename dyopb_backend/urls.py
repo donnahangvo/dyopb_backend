@@ -31,38 +31,70 @@ urlpatterns = [
     path('admin/admin_order_pdf/<int:order_id>/', include('apps.order.api.urls')),
 
     # Auth
-
-    path('api/signup/', include('apps.userprofile.api.urls')),
-    path('api/login/', include('apps.userprofile.api.urls')),
-    path('api/logout/', include('apps.userprofile.api.urls')),
-    path('api/myaccount/', include('apps.userprofile.api.urls')),
+    path('api/', include('apps.userprofile.api.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 
-    # Cart and Orders
+    # Cart, Coupon, Newsletter, Orders
 
-    path('api/coupon/', include('apps.coupon.api.urls')),
-    path('api/newsletter/', include('apps.newsletter.api.urls')),
-
-    path('api/checkout/', include('apps.order.api.urls')),
-    path('api/cart/', include('apps.cart.api.urls')),
-    path('api/cart/add/<int:product_id>/', include('apps.cart.api.urls')),
-    path('api/cart/remove/<int:product_id>/', include('apps.cart.api.urls')),
-    path('api/cart/detail/', include('apps.cart.api.urls')),
-    path('api/cart/success/', include('apps.cart.api.urls')),
-    path('api/webhook/', include('apps.cart.api.urls')),
+    path('api/', include('apps.coupon.api.urls')),
+    path('api/', include('apps.newsletter.api.urls')),
+    path('api/', include('apps.order.api.urls')),
+    path('api/', include('apps.cart.api.urls')),
 
     # Store
-
-    path('api/search/', include('apps.store.api.urls')),
-    path('api/variations/', include('apps.store.api.urls')),
-    path('api/options/', include('apps.store.api.urls')),
-    path('api/specifications/', include('apps.store.api.urls')),
-    path('api/products/<str:category_slug>/<str:slug>/', include('apps.store.api.urls')),
-    path('api/categories/<str:slug>/', include('apps.store.api.urls')),
+    path('api/', include('apps.store.api.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 
+
+
+
+
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+#     path('admin/admin_order_pdf/<int:order_id>/', include('apps.order.api.urls')),
+
+#     # Auth
+#     path('api/', include('apps.userprofile.api.urls')),
+
+#     # path('api/signup/', include('apps.userprofile.api.urls')),
+#     # path('api/login/', include('apps.userprofile.api.urls')),
+#     # path('api/logout/', include('apps.userprofile.api.urls')),
+#     # path('api/myaccount/', include('apps.userprofile.api.urls')),
+    
+#     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+
+#     # Cart, Coupon, Newsletter, Orders
+
+#     path('api/', include('apps.coupon.api.urls')),
+#     path('api/', include('apps.newsletter.api.urls')),
+#     path('api/', include('apps.order.api.urls')),
+#     path('api/', include('apps.cart.api.urls')),
+
+
+#     # path('api/coupon/', include('apps.coupon.api.urls')),
+#     # path('api/newsletter/', include('apps.newsletter.api.urls')),
+
+#     # path('api/checkout/', include('apps.order.api.urls')),
+#     # path('api/cart/', include('apps.cart.api.urls')),
+#     # path('api/cart/add/<int:product_id>/', include('apps.cart.api.urls')),
+#     # path('api/cart/remove/<int:product_id>/', include('apps.cart.api.urls')),
+#     # path('api/cart/detail/', include('apps.cart.api.urls')),
+#     # path('api/cart/success/', include('apps.cart.api.urls')),
+#     # path('api/webhook/', include('apps.cart.api.urls')),
+
+#     # Store
+#     path('api/', include('apps.store.api.urls')),
+
+
+#     # path('api/search/', include('apps.store.api.urls')),
+#     # path('api/variations/', include('apps.store.api.urls')),
+#     # path('api/options/', include('apps.store.api.urls')),
+#     # path('api/specifications/', include('apps.store.api.urls')),
+#     # path('api/products/<str:category_slug>/<str:slug>/', include('apps.store.api.urls')),
+#     # path('api/categories/<str:slug>/', include('apps.store.api.urls')),
+# ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     # path('', frontpage, name='frontpage'),
     # path('cart/', cart_detail, name='cart'),
