@@ -21,14 +21,14 @@ class ProductSerializer(serializers.ModelSerializer):
 class VariationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationCategory
-        fields = ('title', 'variation_sku')
+        fields = ('name', 'variation_sku')
 
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationOption
-        fields = ('title', 'option_sku', 'image', 'thumbnail')
+        fields = ('name', 'option_sku', 'image', 'thumbnail')
 
 class SpecificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationSpecification
-        fields = ('title', 'specification_sku', 'description', 'image', 'thumbnail')
+        fields = ('name', 'specification_sku', 'description', 'image', 'thumbnail')
