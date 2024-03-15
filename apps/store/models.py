@@ -241,6 +241,8 @@ class ProductReview(models.Model):
     stars = models.IntegerField()
 
     date_added = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to='uploads/', blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='uploads/', help_text=_('Automatically generated, do not need to upload'), blank=True, null=True)   
 
     class Meta:
         verbose_name = _('Product Review')

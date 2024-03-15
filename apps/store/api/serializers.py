@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.store.models import ProductImage, Category, Product, VariationCategory, VariationOption, VariationSpecification
+from apps.store.models import ProductImage, Category, Product, VariationCategory, VariationOption, VariationSpecification, ProductReview
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -32,3 +32,8 @@ class SpecificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationSpecification
         fields = ('name', 'specification_sku', 'description', 'image', 'thumbnail')
+
+class ProductReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReview
+        fields = ('user', 'stars', 'content', 'date_added', 'image', 'thumbnail')
