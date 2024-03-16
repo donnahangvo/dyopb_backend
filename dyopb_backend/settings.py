@@ -10,16 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-STRIPE_API_KEY_PUBLISHABLE = "pk_test_51OnoSiDWHjqKCwzMJxuwijx8NsVhLAQw5IHjgRX94fpr5UVQjeZhV47U6V2m3wQQ0PiJxAvCkJCyrbk86hVeCDbp00tE37vxgV"
-STRIPE_API_KEY_HIDDEN = "sk_test_51OnoSiDWHjqKCwzMnsO7rQSk8yMBn5igTYbSgyuCahBRsXMqzslQ6EWVSfrZ4S2hUhbpsZXLPNhk4qYGPGdCnn8u00p3ips9wi"
-
-
-PAYPAL_API_KEY_PUBLISHABLE = "AZYkJ7NlgcjoSbtOHbODFyU647jUag2ETdUAAnZZsHWHs6UFU0_-XR9hrA6lUFuMNQiqBlDJ4VOBhF3t"
-PAYPAL_API_KEY_HIDDEN = "EPfwvX-IDAz2DbgRxWGL02gy8szMSgmOOngTCq9xSo-SPv5igrQ1ybbbK8DNlDAuoWsLLXzJKfDLn8CS"
-
 import os
 
 from pathlib import Path
+
+STRIPE_API_KEY_PUBLISHABLE = os.environ.get('STRIPE_API_KEY_PUBLISHABLE')
+STRIPE_API_KEY_HIDDEN = os.environ.get('STRIPE_API_KEY_HIDDEN')
+
+
+PAYPAL_API_KEY_PUBLISHABLE = os.environ.get('PAYPAL_API_KEY_PUBLISHABLE')
+PAYPAL_API_KEY_HIDDEN = os.environ.get('PAYPAL_API_KEY_HIDDEN')
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -77,6 +78,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'stripe',
+    'paypalrestsdk',
     'mptt',
     'ckeditor',
 

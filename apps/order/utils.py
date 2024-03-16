@@ -1,8 +1,10 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from apps.order.models import Order, OrderItem
 from apps.cart.cart import Cart
 
+@csrf_exempt
 @login_required
 def checkout(request):
     # Get user details from the request or use default values
@@ -11,8 +13,8 @@ def checkout(request):
         first_name = user.first_name
         last_name = user.last_name
         email = user.email
-        address = user.userprofile.address
-        apartment = user.userprofile.apartment
+        address1 = user.userprofile.address1
+        address2 = user.userprofile.address2
         city = user.userprofile.city
         state = user.userprofile.state
         zipcode = user.userprofile.zipcode
@@ -23,8 +25,8 @@ def checkout(request):
         first_name = request.POST.get('first_name', '')
         last_name = request.POST.get('last_name', '')
         email = request.POST.get('email', '')
-        address = request.POST.get('address', '')
-        apartment = request.POST.get('apartment', '')
+        address1 = request.POST.get('address1', '')
+        address2 = request.POST.get('address2', '')
         city = request.POST.get('city', '')
         state = request.POST.get('state', '')
         zipcode = request.POST.get('zipcode', '')
@@ -37,8 +39,8 @@ def checkout(request):
         first_name=first_name,
         last_name=last_name,
         email=email,
-        address=address,
-        apartment=apartment,
+        address1=address1,
+        address2=address2,
         city=city,
         state=state,
         zipcode=zipcode,

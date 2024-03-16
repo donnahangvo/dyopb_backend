@@ -1,8 +1,8 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 
 <html>
     <head>
-        <title>Order PDF</title>
+        <title>Order Details</title>
 
         <style type="text/css">
             body {
@@ -38,8 +38,8 @@
 
             <p>
                 {{ order.first_name }} {{ order.last_name }}<br>
-                {{ order.address }}<br>
-                {{ order.apartment }} {{ order.city }}<br>
+                {{ order.address1 }}<br>
+                {{ order.address2 }} {{ order.city }}<br>
                 {{ order.state }} {{ order.zipcode }} {{ order.country }}
             </p>
 
@@ -58,7 +58,7 @@
                     <tr class="item">
                         <td>
                             {% if item.product.thumbnail.url %}
-                                <img src="http://127.0.0.1:8000{{ item.product.get_thumbnail }}" width="40">
+                                <img src="https://dyopb-backend.onrender.com{{ item.product.get_thumbnail }}" width="40">
                             {% endif %}
                         </td>
                         <td>{{ item.product.title }}</td>
@@ -80,4 +80,4 @@
             <p>Thank you your order!</p>
         </div>
     </body>
-</html> -->
+</html>
