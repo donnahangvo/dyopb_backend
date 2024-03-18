@@ -1,50 +1,55 @@
 from django.conf import settings
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt 
 from .cart import Cart
 
+@csrf_exempt  # Add this decorator to allow POST requests from external domains
 def cart_detail(request):
-    cart = Cart(request)
-    products = []
+    if request.method == 'GET':  # Allow only GET requests
+        cart = Cart(request)
+        products = []
 
-    for item in cart:
-        product = item['product']
-        url = '/%s/%s/' % (product.category.slug, product.slug)
-        product_data = {
-            'id': product.id,
-            'title': product.title,
-            'price': product.price,
-            'quantity': item['quantity'],
-            'total_price': item['total_price'],
-            'thumbnail': product.get_thumbnail,
-            'url': url,
-            'num_available': product.num_available
+        for item in cart:
+            product = item['product']
+            url = '/%s/%s/' % (product.category.slug, product.slug)
+            product_data = {
+                'id': product.id,
+                'title': product.title,
+                'price': product.price,
+                'quantity': item['quantity'],
+                'total_price': item['total_price'],
+                'thumbnail': product.get_thumbnail,
+                'url': url,
+                'num_available': product.num_available
+            }
+            products.append(product_data)
+
+        user_data = {}
+        if request.user.is_authenticated:
+            user_profile = request.user.userprofile
+            user_data = {
+                'first_name': request.user.first_name,
+                'last_name': request.user.last_name,
+                'email': request.user.email,
+                'address1': user_profile.address1,
+                'address2': user_profile.address2,
+                'city': user_profile.city,
+                'state': user_profile.state,
+                'zipcode': user_profile.zipcode,
+                'country': user_profile.country,
+                'phone': user_profile.phone
+            }
+
+        context = {
+            'cart': products,
+            **user_data,
+            'pub_key': settings.STRIPE_API_KEY_PUBLISHABLE,
+            'pub_key_paypal': settings.PAYPAL_API_KEY_PUBLISHABLE,
         }
-        products.append(product_data)
 
-    user_data = {}
-    if request.user.is_authenticated:
-        user_profile = request.user.userprofile
-        user_data = {
-            'first_name': request.user.first_name,
-            'last_name': request.user.last_name,
-            'email': request.user.email,
-            'address1': user_profile.address1,
-            'address2': user_profile.address2,
-            'city': user_profile.city,
-            'state': user_profile.state,
-            'zipcode': user_profile.zipcode,
-            'country': user_profile.country,
-            'phone': user_profile.phone
-        }
-
-    context = {
-        'cart': products,
-        **user_data,
-        'pub_key': settings.STRIPE_API_KEY_PUBLISHABLE,
-        'pub_key_paypal': settings.PAYPAL_API_KEY_PUBLISHABLE,
-    }
-
-    return JsonResponse(context)
+        return JsonResponse(context)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)  # Return error for non-GET requests
 
 def success(request):
     cart = Cart(request)

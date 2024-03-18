@@ -4,7 +4,11 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from io import BytesIO
 from xhtml2pdf import pisa
-from apps.order.models import Order
+from apps.order.models import Order, Shipping
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 
 @login_required
 def admin_order_pdf(request, order_id):
@@ -42,6 +46,19 @@ def render_to_pdf(template_path, context_dict={}):
         print("PDF generation error:", pdf.err)
         return None
 
+@api_view(['POST'])
+def calculate_shipping(request):
+    order_total = request.data.get('order_total', 0)
+    
+    # Assuming Free Shipping is available for orders over $50
+    if order_total >= 50:
+        shipping_option = Shipping.objects.get(name='Free Shipping')
+    else:
+        shipping_option = Shipping.objects.get(name='Flat Rate')
+    
+    shipping_cost = shipping_option.rate
+    
+    return Response({'shipping_cost': shipping_cost})
 
 
 # from io import BytesIO
