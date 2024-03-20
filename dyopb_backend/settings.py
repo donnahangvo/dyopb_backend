@@ -82,7 +82,6 @@ INSTALLED_APPS = [
     'mptt',
     'ckeditor',
 
-    # 'apps.core',
     'apps.cart',
     'apps.coupon',
     'apps.newsletter',

@@ -21,14 +21,14 @@ from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 from django.contrib.auth import views
 
-
+from apps.order.views import admin_order_pdf
 from .sitemaps import StaticViewSitemap, CategorySitemap, ProductSitemap
 
 sitemaps = {'static': StaticViewSitemap, 'product': ProductSitemap, 'category': CategorySitemap}
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('admin/admin_order_pdf/<int:order_id>/', include('apps.order.api.urls')),
+    path('admin/admin_order_pdf/<int:order_id>/', admin_order_pdf, name='admin_order_pdf'),
 
     # Auth
     path('api/', include('apps.userprofile.api.urls')),
