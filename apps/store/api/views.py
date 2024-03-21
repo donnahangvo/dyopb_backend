@@ -54,7 +54,7 @@ def specification_detail(request):
 
 @api_view(['GET', 'POST'])
 def product_detail(request):
-    products = Category.objects.all()
+    products = Product.objects.all()
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
