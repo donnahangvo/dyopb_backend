@@ -34,35 +34,35 @@ def search(request):
 
 
 @api_view(['GET'])
-def variation_list(request):
+def variation_detail(request):
     variations = VariationCategory.objects.all()
     serializer = VariationSerializer(variations, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])
-def option_list(request):
+def option_detail(request):
     options = VariationOption.objects.all()
     serializer = OptionSerializer(options, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])
-def specification_list(request):
+def specification_detail(request):
     specifications = VariationSpecification.objects.all()
     serializer = SpecificationSerializer(specifications, many=True)
     return Response(serializer.data)
 
 
 @api_view(['GET', 'POST'])
-def product_detail(request, category_slug, slug):
-    product = get_object_or_404(Product, slug=slug)
-    serializer = ProductSerializer(product)
+def product_detail(request):
+    products = Category.objects.all()
+    serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
 
 @api_view(['GET'])
-def category_detail(request, slug):
-    category = get_object_or_404(Category, slug=slug)
-    serializer = CategorySerializer(category)
+def category_detail(request):
+    categories = Category.objects.all()
+    serializer = CategorySerializer(categories, many=True)
     return Response(serializer.data)
 
 @api_view(['GET', 'POST', 'DELETE'])

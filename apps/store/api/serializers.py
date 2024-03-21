@@ -10,30 +10,29 @@ class ImageSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('title', 'category_sku')
-
+        fields = ('id','title', 'slug', 'category_sku')
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('category', 'title', 'product_sku', 'description', 'price', 'image', 'thumbnail' )
+        fields = ('id', 'category', 'title', 'slug', 'product_sku', 'description', 'price', 'image', 'thumbnail' )
 
 class VariationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationCategory
-        fields = ('name', 'variation_sku')
+        fields = ('id', 'name', 'slug', 'variation_sku')
 
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationOption
-        fields = ('name', 'option_sku', 'image', 'thumbnail')
+        fields = ('id', 'name', 'slug', 'option_sku', 'image', 'thumbnail')
 
 class SpecificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationSpecification
-        fields = ('name', 'specification_sku', 'description', 'image', 'thumbnail')
+        fields = ('id', 'name', 'slug', 'specification_sku', 'description', 'image', 'thumbnail')
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
-        fields = ('user', 'stars', 'content', 'date_added', 'image', 'thumbnail')
+        fields = ('id', 'user', 'stars', 'content', 'date_added', 'image', 'thumbnail')
