@@ -12,26 +12,44 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.http import JsonResponse
 
-from apps.store.api.serializers import CategorySerializer, ProductSerializer, VariationSerializer, OptionSerializer, SpecificationSerializer, ProductReviewSerializer
-from apps.store.models import Category, Product, VariationCategory, VariationOption, VariationSpecification, ProductReview
+from apps.store.api.serializers import CategorySerializer, ProductSerializer, ProductImageSerializer, VariationSerializer, OptionSerializer, SpecificationSerializer, ProductReviewSerializer
+from apps.store.models import Category, Product, ProductImage, VariationCategory, VariationOption, VariationSpecification, ProductReview
 
 # create methods for getting information from rest framework to be shown on the frontend
 
 @api_view(['GET'])
-def search(request):
-    query = request.GET.get('query')
-    instock = request.GET.get('instock')
-    price_from = request.GET.get('price_from', 0)
-    price_to = request.GET.get('price_to', 100000)
-    sorting = request.GET.get('sorting', '-date_added')
-    products = Product.objects.filter(Q(title__icontains=query) | Q(description__icontains=query)).filter(price__gte=price_from).filter(price__lte=price_to)
-
-    if instock:
-        products = products.filter(num_available__gte=1)
-
-    serializer = ProductSerializer(products.order_by(sorting), many=True)
+def category_detail(request):
+    categories = Category.objects.all()
+    serializer = CategorySerializer(categories, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def product_detail(request):
+    products = Product.objects.all()
+    serialized_products = []
+    for product in products:
+        product_data = ProductSerializer(product).data
+        product_images = product.images.all()
+        product_image_data = ProductImageSerializer(product_images, many=True).data
+        product_data['images'] = product_image_data
+
+        # # Include variation-related data
+        # variation = VariationCategory.objects.filter(product=product)
+        # variation_data = VariationSerializer(variation, many=True).data
+        # product_data['variations'] = variation_data
+
+        # # Include option-related data
+        # option = VariationOption.objects.filter(product=product)
+        # option_data = OptionSerializer(option, many=True).data
+        # product_data['options'] = option_data
+
+        # # Include specification-related data
+        # specification = VariationSpecification.objects.filter(product=product)
+        # specification_data = SpecificationSerializer(specification, many=True).data
+        # product_data['specifications'] = specification_data
+
+        serialized_products.append(product_data)
+    return Response(serialized_products)
 
 @api_view(['GET'])
 def variation_detail(request):
@@ -52,17 +70,19 @@ def specification_detail(request):
     return Response(serializer.data)
 
 
-@api_view(['GET', 'POST'])
-def product_detail(request):
-    products = Product.objects.all()
-    serializer = ProductSerializer(products, many=True)
-    return Response(serializer.data)
-
-
 @api_view(['GET'])
-def category_detail(request):
-    categories = Category.objects.all()
-    serializer = CategorySerializer(categories, many=True)
+def search(request):
+    query = request.GET.get('query')
+    instock = request.GET.get('instock')
+    price_from = request.GET.get('price_from', 0)
+    price_to = request.GET.get('price_to', 100000)
+    sorting = request.GET.get('sorting', '-date_added')
+    products = Product.objects.filter(Q(title__icontains=query) | Q(description__icontains=query)).filter(price__gte=price_from).filter(price__lte=price_to)
+
+    if instock:
+        products = products.filter(num_available__gte=1)
+
+    serializer = ProductSerializer(products.order_by(sorting), many=True)
     return Response(serializer.data)
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -96,3 +116,10 @@ def product_review(request, category_slug, slug):
                 return Response({"error": "You do not have permission to delete this review"}, status=403)
         else:
             return Response({"error": "Review ID is required"}, status=400)
+        
+
+# @api_view(['GET', 'POST'])
+# def product_detail(request):
+#     products = Product.objects.all()
+#     serializer = ProductSerializer(products, many=True)
+#     return Response(serializer.data)

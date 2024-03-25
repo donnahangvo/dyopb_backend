@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django import forms
 from ckeditor.widgets import CKEditorWidget
-from .models import Category, Product, VariationCategory, VariationOption, VariationSpecification, ProductReview
+from mptt.admin import MPTTModelAdmin
+from .models import Category, Product, ProductImage, VariationCategory, VariationOption, VariationSpecification, ProductReview
 
 # Register Store models
 admin.site.register(Category)
@@ -14,12 +15,32 @@ class ProductAdminForm(forms.ModelForm):
         model = Product
         fields = '__all__'
 
+# Inline admin for ProductImage
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+
+# Inline admin for VariationCategory
+class VariationCategoryInline(admin.TabularInline):
+    model = VariationCategory
+
+# # Inline admin for VariationOption
+# class VariationOptionInline(admin.TabularInline):
+#     model = VariationOption
+
+# # Inline admin for VariationSpecification
+# class VariationSpecificationInline(admin.TabularInline):
+#     model = VariationSpecification
+
 # Register Product model admin
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     form = ProductAdminForm
+    inlines = [
+        ProductImageInline,
+        VariationCategoryInline,
+    ]
 
-admin.site.register(VariationCategory)
+admin.site.register(VariationCategory, MPTTModelAdmin)
 admin.site.register(VariationOption)
 admin.site.register(VariationSpecification)
 admin.site.register(ProductReview)
