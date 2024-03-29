@@ -11,5 +11,6 @@ urlpatterns = [
     path('specification/', specification_detail, name='specification_list'),
     path('product/', product_detail, name='product_detail'),
     path('category/', category_detail, name='category_detail'),
+    # path('product_variation/', product_variation, name='product_variation'),
     path('product/<str:category_slug>/<str:slug>/review/', product_review, name='product_review'),
 ]

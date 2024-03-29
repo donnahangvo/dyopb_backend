@@ -23,6 +23,8 @@ def category_detail(request):
     serializer = CategorySerializer(categories, many=True)
     return Response(serializer.data)
 
+
+
 @api_view(['GET'])
 def product_detail(request):
     products = Product.objects.all()
@@ -32,21 +34,6 @@ def product_detail(request):
         product_images = product.images.all()
         product_image_data = ProductImageSerializer(product_images, many=True).data
         product_data['images'] = product_image_data
-
-        # # Include variation-related data
-        # variation = VariationCategory.objects.filter(product=product)
-        # variation_data = VariationSerializer(variation, many=True).data
-        # product_data['variations'] = variation_data
-
-        # # Include option-related data
-        # option = VariationOption.objects.filter(product=product)
-        # option_data = OptionSerializer(option, many=True).data
-        # product_data['options'] = option_data
-
-        # # Include specification-related data
-        # specification = VariationSpecification.objects.filter(product=product)
-        # specification_data = SpecificationSerializer(specification, many=True).data
-        # product_data['specifications'] = specification_data
 
         serialized_products.append(product_data)
     return Response(serialized_products)
@@ -118,8 +105,25 @@ def product_review(request, category_slug, slug):
             return Response({"error": "Review ID is required"}, status=400)
         
 
-# @api_view(['GET', 'POST'])
-# def product_detail(request):
-#     products = Product.objects.all()
-#     serializer = ProductSerializer(products, many=True)
-#     return Response(serializer.data)
+
+
+
+        # @api_view(['GET'])
+# def product_variation(request, product_id):
+#     product = Product.objects.get(pk=product_id)
+#     variations = product.productvariation_set.all()
+#     options = VariationOption.objects.filter(variation__in=variations)
+#     specifications = VariationSpecification.objects.filter(option__in=options)
+    
+#     product_data = ProductSerializer(product).data
+#     variation_data = VariationSerializer(variations, many=True).data
+#     option_data = OptionSerializer(options, many=True).data
+#     specification_data = SpecificationSerializer(specifications, many=True).data
+    
+#     response_data = {
+#         'product': product_data,
+#         'variations': variation_data,
+#         'options': option_data,
+#         'specifications': specification_data,
+#     }
+#     return Response(response_data)

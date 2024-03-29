@@ -17,8 +17,8 @@ import os
 # Image Handler to store and create thumbnails
 
 class ImageHandler(models.Model):
-    image = models.ImageField(verbose_name=_('Image'), help_text=_('Upload product image'), upload_to='product_images/', blank=True, null=True)
-    thumbnail = models.ImageField(upload_to='uploads/', help_text=_('Automatically generated, do not need to upload'), blank=True, null=True)
+    image = models.ImageField(upload_to='product_images/',verbose_name=_('Image'), help_text=_('Upload product image'), blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='uploads/product/thumbnails/', help_text=_('Automatically generated, do not need to upload'), blank=True, null=True)
     alt_text = models.CharField(verbose_name=_('Alternative text'), help_text=_('Add alternative text'), max_length=255, blank=True, null=True)
 
     class Meta:
@@ -101,6 +101,10 @@ def product_image_delete(sender, instance, **kwargs):
     if instance.thumbnail:
         instance.thumbnail.delete(False)
 
+
+
+
+
 # Category Model
 class Category(models.Model):
     parent = models.ForeignKey('self', related_name='children', on_delete=models.CASCADE, blank=True, null=True)
@@ -124,19 +128,20 @@ class Category(models.Model):
 
 # Product Model    
 class Product(MPTTModel):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(help_text=_('Featured product name'), max_length=255, unique=True)
     slug = models.SlugField(help_text=_('Category safe URL'), max_length=255, unique=True)
     product_sku = models.CharField(verbose_name=_("Product SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
     description = models.TextField(verbose_name=_('Description'),help_text=_('Not Required'), max_length=10000, blank=True, null=True)
-    price = models.DecimalField(verbose_name=_('Base Price'), help_text=_('Maximum 9999999.99'), max_digits=9, decimal_places=2)
+    price = models.DecimalField(verbose_name=_('Base Price'), help_text=_('Maximum 9999999.99'), max_digits=9, decimal_places=2, blank=True, null=True,)
     is_featured = models.BooleanField(default=False)
+    ordering = models.IntegerField(default=0)
     num_visits = models.IntegerField(default=0)
     last_visit = models.DateTimeField(blank=True, null=True)
     created = models.DateTimeField(_('Created on'), auto_now_add=True, editable=False)
     updated = models.DateTimeField(_('Updated on'), auto_now=True)
-    ordering = models.IntegerField(default=0)
+    
     
     class Meta:
         ordering = ('ordering',)
@@ -166,8 +171,8 @@ class ProductImage(models.Model):
 
 # Product Variation Models
 class VariationCategory(MPTTModel):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product', default=1)
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+    product = models.ManyToManyField(Product, related_name='variation')
     name = models.CharField(help_text=_('Variation Categories - Required if there are options'), max_length=255, unique=True)
     slug = models.SlugField(help_text=_('Category safe URL'), max_length=255, unique=True)
     variation_sku = models.CharField(verbose_name=_("Variation SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
@@ -191,16 +196,20 @@ class VariationCategory(MPTTModel):
         return self.name
     
     def get_absolute_url(self):
-        return '/%s/%s/' % (self.variation.slug, self.slug)
+        if self.parent:
+            return '/%s/%s/' % (self.parent.slug, self.slug)
+        return '/%s/' % (self.slug)
+
 
 class VariationOption(ImageHandler, MPTTModel):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='option')
-    variation = models.ForeignKey(VariationCategory, on_delete=models.CASCADE, related_name='variation', default=1)
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+    product = models.ManyToManyField(Product, related_name='option')
+    variation = models.ForeignKey(VariationCategory, on_delete=models.CASCADE, related_name='option', default=1)
     name = models.CharField(help_text=_('Variation Option - not required'), max_length=255, unique=True)
     slug = models.SlugField(help_text=_('Category safe URL'), max_length=255, unique=True)
     option_sku = models.CharField(verbose_name=_("Option SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
     description = models.TextField(verbose_name=_('Description'),help_text=_('Not Required'), max_length=10000, blank=True, null=True)
+    price = models.DecimalField(verbose_name=_('Base Price'), help_text=_('Maximum 9999999.99'), max_digits=9, decimal_places=2, blank=True, null=True,)
     image = models.ImageField(upload_to='uploads/option/images/', blank=True, null=True)
     thumbnail = models.ImageField(upload_to='uploads/option/thumbnails/', help_text=_('Automatically generated, do not need to upload'), blank=True, null=True)
     ordering = models.IntegerField(default=0)   
@@ -216,16 +225,20 @@ class VariationOption(ImageHandler, MPTTModel):
         return self.name
     
     def get_absolute_url(self):
-        return f'/{self.option.slug}/{self.slug}/'
+        if self.parent:
+            return '/%s/%s/%s/' % (self.variation.slug, self.parent.slug, self.slug)
+        return '/%s/%s/' % (self.variation.slug, self.slug)
+    
 
 class VariationSpecification(ImageHandler, MPTTModel):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='specification')
-    option = models.ForeignKey(VariationOption, on_delete=models.CASCADE, related_name='option', default=1)
     parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+    product = models.ManyToManyField(Product, related_name='specification')
+    option = models.ForeignKey(VariationOption, on_delete=models.CASCADE, related_name='specification', default=1)
     name = models.CharField(help_text=_('Variation Specifications - not required'), max_length=255, unique=True)
     slug = models.SlugField(help_text=_('Category safe URL'), max_length=255, unique=True)
     specification_sku = models.CharField(verbose_name=_("Specification SKU"), max_length=255, blank=True, null=True, help_text=_("Defaults to slug if left blank"))
     description = models.TextField(verbose_name=_('Description'),help_text=_('Not Required'), max_length=10000, blank=True, null=True)
+    price = models.DecimalField(verbose_name=_('Base Price'), help_text=_('Maximum 9999999.99'), max_digits=9, decimal_places=2, blank=True, null=True,)
     num_available = models.IntegerField(default=None, null=True, blank=True)
     is_featured = models.BooleanField(default=True)
     image = models.ImageField(upload_to='uploads/specification/images/', blank=True, null=True)
@@ -243,17 +256,22 @@ class VariationSpecification(ImageHandler, MPTTModel):
         return self.name
     
     def get_absolute_url(self):
-        return '/%s/%s/' % (self.specification.slug, self.slug)
-
+        if self.parent:
+            return '/%s/%s/%s/' % (self.option.variation.slug, self.option.slug, self.slug)
+        return '/%s/%s/' % (self.option.slug, self.slug)
     
+
+
+
+
 class ProductReview(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(User, related_name='reviews', on_delete=models.CASCADE)
     content = models.TextField(blank=True, null=True)
     stars = models.IntegerField()
     date_added = models.DateTimeField(auto_now_add=True)
-    image = models.ImageField(upload_to='uploads/', blank=True, null=True)
-    thumbnail = models.ImageField(upload_to='uploads/', help_text=_('Automatically generated, do not need to upload'), blank=True, null=True)   
+    image = models.ImageField(upload_to='uploads/product_reviews/images/', blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='uploads/product_reviews/images/', help_text=_('Automatically generated, do not need to upload'), blank=True, null=True)   
 
     class Meta:
         verbose_name = _('Product Review')
@@ -268,6 +286,45 @@ class ProductReview(models.Model):
 
 
 
+
+    # def delete(self, *args, **kwargs):
+    #     # Delete image files before deleting the instance
+    #     storage, path = self.image.storage, self.image.path
+    #     storage.delete(path)
+    #     if self.thumbnail:
+    #         thumb_storage, thumb_path = self.thumbnail.storage, self.thumbnail.path
+    #         thumb_storage.delete(thumb_path)
+    #     super().delete(*args, **kwargs)
+
+
+
+    # def get_absolute_url(self):
+    #     return '/%s/%s/' % (self.variation.slug, self.slug)
+
+    # def get_absolute_url(self):
+    #     return f'/{self.option.slug}/{self.slug}/'
+
+
+    # def get_absolute_url(self):
+    #     return '/%s/%s/' % (self.specification.slug, self.slug)
+    
+# # Product Variation Models
+# class ProductVariation(models.Model):
+#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+#     variation = models.ForeignKey(VariationCategory, on_delete=models.CASCADE)
+#     option = models.ForeignKey(VariationOption, on_delete=models.CASCADE, null=True, blank=True)
+#     specification = models.ForeignKey(VariationSpecification, on_delete=models.CASCADE, null=True, blank=True)
+
+#     class Meta:
+#         verbose_name = _('Product Variation')
+#         verbose_name_plural = _('Product Variations')
+#         unique_together = ('product', 'variation', 'option', 'specification')
+
+#     def get_options(self):
+#         return self.variation.option_set.all()
+
+#     def get_specifications(self):
+#         return self.variation.specification_set.all()
 
 
 

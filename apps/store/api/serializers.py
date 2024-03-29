@@ -5,7 +5,7 @@ from apps.store.models import Image, Category, Product, ProductImage, VariationC
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ('image', 'thumbnail')
+        fields = ('image', 'thumbnail', 'alt_text')
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,7 +15,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('id', 'category', 'parent', 'name', 'slug', 'product_sku', 'description', 'price', 'is_featured', 'ordering' )
+        fields = ('id', 'parent','category', 'name', 'slug', 'product_sku', 'description', 'price', 'is_featured', 'ordering')
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,17 +25,17 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class VariationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationCategory
-        fields = ('id', 'product', 'parent', 'name', 'slug', 'variation_sku', 'description', 'image', 'thumbnail', 'ordering')
+        fields = ('id', 'parent', 'product', 'name', 'slug', 'variation_sku', 'description', 'image', 'thumbnail', 'ordering')
 
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationOption
-        fields = ('id', 'variation', 'parent', 'name', 'slug', 'option_sku', 'description', 'image', 'thumbnail', 'ordering')
+        fields = ('id', 'parent', 'variation', 'name', 'slug', 'option_sku', 'description', 'image', 'thumbnail', 'ordering')
 
 class SpecificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationSpecification
-        fields = ('id', 'option', 'parent', 'name', 'slug', 'specification_sku', 'description', 'num_available', 'is_featured', 'image', 'thumbnail', 'ordering')
+        fields = ('id', 'parent', 'option', 'name', 'slug', 'specification_sku', 'description', 'num_available', 'is_featured', 'image', 'thumbnail', 'ordering')
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
