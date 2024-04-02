@@ -30,12 +30,12 @@ class VariationSerializer(serializers.ModelSerializer):
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationOption
-        fields = ('id', 'parent', 'variation', 'name', 'slug', 'option_sku', 'description', 'image', 'thumbnail', 'ordering')
+        fields = ('id', 'parent', 'product', 'variation', 'name', 'slug', 'option_sku', 'description', 'price', 'image', 'thumbnail', 'ordering')
 
 class SpecificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariationSpecification
-        fields = ('id', 'parent', 'option', 'name', 'slug', 'specification_sku', 'description', 'num_available', 'is_featured', 'image', 'thumbnail', 'ordering')
+        fields = ('id', 'parent', 'product', 'option', 'name', 'slug', 'specification_sku', 'description', 'price', 'num_available', 'is_featured', 'image', 'thumbnail', 'ordering')
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:

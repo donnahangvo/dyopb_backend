@@ -18,43 +18,118 @@ from apps.store.models import Category, Product, ProductImage, VariationCategory
 # create methods for getting information from rest framework to be shown on the frontend
 
 @api_view(['GET'])
-def category_detail(request):
+def category_list(request):
     categories = Category.objects.all()
     serializer = CategorySerializer(categories, many=True)
     return Response(serializer.data)
 
-
-
 @api_view(['GET'])
-def product_detail(request):
+def product_list(request):
+    # Retrieve all products
     products = Product.objects.all()
-    serialized_products = []
-    for product in products:
-        product_data = ProductSerializer(product).data
-        product_images = product.images.all()
-        product_image_data = ProductImageSerializer(product_images, many=True).data
-        product_data['images'] = product_image_data
-
-        serialized_products.append(product_data)
+    
+    # Serialize the products
+    serialized_products = ProductSerializer(products, many=True).data
+    
+    # Return serialized products as a response
     return Response(serialized_products)
 
 @api_view(['GET'])
-def variation_detail(request):
+def variation_list(request):
     variations = VariationCategory.objects.all()
     serializer = VariationSerializer(variations, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])
-def option_detail(request):
+def option_list(request):
     options = VariationOption.objects.all()
     serializer = OptionSerializer(options, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])
-def specification_detail(request):
+def specification_list(request):
     specifications = VariationSpecification.objects.all()
     serializer = SpecificationSerializer(specifications, many=True)
     return Response(serializer.data)
+
+
+
+@api_view(['GET'])
+def category_product(request, slug):
+    # Retrieve the category based on the slug
+    category = get_object_or_404(Category, slug=slug)
+    
+    # Retrieve products associated with the category
+    products = Product.objects.filter(category=category)
+    
+    # Serialize the products
+    serialized_products = ProductSerializer(products, many=True).data
+
+        # Serialize the products along with their images
+    serialized_products = []
+    for product in products:
+        serialized_product = ProductSerializer(product).data
+        serialized_product['images'] = ProductImageSerializer(product.images.all(), many=True).data
+        serialized_products.append(serialized_product)
+    
+    return Response(serialized_products)
+
+
+@api_view(['GET'])
+def product_detail(request, slug):
+    # Retrieve the product based on the category_slug and slug
+    product = get_object_or_404(Product, slug=slug)
+
+        # Serialize the product along with its images
+    serialized_product = ProductSerializer(product).data
+    serialized_product['images'] = ProductImageSerializer(product.images.all(), many=True).data
+    
+    return Response(serialized_product)   
+
+
+@api_view(['GET'])
+def variation_detail(request, product_id):
+    # Get the product instance associated with the provided product_id
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Get all variations associated with the product
+    variations = VariationCategory.objects.filter(product=product)
+    
+    # Serialize variations
+    serialized_variations = VariationSerializer(variations, many=True).data
+
+    return Response(serialized_variations)
+
+
+@api_view(['GET'])
+def option_detail(request, product, variation_id):
+    # Get the variation instance associated with the provided product_id and variation_id
+    variation = get_object_or_404(VariationCategory, product=product, id=variation_id)
+
+    # Get all options associated with the variation
+    options = VariationOption.objects.filter(variation=variation)
+
+    # Serialize options
+    serialized_options = OptionSerializer(options, many=True).data
+    return Response(serialized_options)
+
+
+@api_view(['GET'])
+def specification_detail(request, product, option_id):
+    # Get the option instance associated with the provided product_id and option_id
+    option = get_object_or_404(VariationOption, variation__product=product, id=option_id)
+
+    # Get all specifications associated with the option
+    specifications = VariationSpecification.objects.filter(option=option)
+
+    # Serialize specifications
+    serialized_specifications = SpecificationSerializer(specifications, many=True).data
+    return Response(serialized_specifications)
+
+
+
+
+
 
 
 @api_view(['GET'])
