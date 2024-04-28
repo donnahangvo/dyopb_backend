@@ -28,8 +28,12 @@ def product_list(request):
     # Retrieve all products
     products = Product.objects.all()
     
-    # Serialize the products
-    serialized_products = ProductSerializer(products, many=True).data
+    # Serialize each product along with its images
+    serialized_products = []
+    for product in products:
+        serialized_product = ProductSerializer(product).data
+        serialized_product['images'] = ProductImageSerializer(product.images.all(), many=True).data
+        serialized_products.append(serialized_product)
     
     # Return serialized products as a response
     return Response(serialized_products)
@@ -75,16 +79,83 @@ def category_product(request, slug):
     return Response(serialized_products)
 
 
+# @api_view(['GET'])
+# def product_detail(request, slug):
+#     # Retrieve the product based on the category_slug and slug
+#     product = get_object_or_404(Product, slug=slug)
+
+#         # Serialize the product along with its images
+#     serialized_product = ProductSerializer(product).data
+#     serialized_product['images'] = ProductImageSerializer(product.images.all(), many=True).data
+    
+#     return Response(serialized_product)   
+
+
+# @api_view(['GET'])
+# def product_detail(request, slug):
+#     # Retrieve the product based on the category_slug and slug
+#     product = get_object_or_404(Product, slug=slug)
+
+#     # Serialize the product along with its images
+#     serialized_product = ProductSerializer(product).data
+#     serialized_product['images'] = ProductImageSerializer(product.images.all(), many=True).data
+    
+#     # Optionally, include variations in the serialized product
+#     serialized_product['variations'] = []
+#     for variation in product.variation.all():
+#         serialized_variation = {
+#             'id': variation.id,
+#             'name': variation.name,
+#             # Add other variation fields as needed
+#         }
+#         serialized_product['variations'].append(serialized_variation)
+
+#     return Response(serialized_product)
+
 @api_view(['GET'])
 def product_detail(request, slug):
     # Retrieve the product based on the category_slug and slug
     product = get_object_or_404(Product, slug=slug)
 
-        # Serialize the product along with its images
+    # Serialize the product along with its images
     serialized_product = ProductSerializer(product).data
     serialized_product['images'] = ProductImageSerializer(product.images.all(), many=True).data
     
-    return Response(serialized_product)   
+    # Optionally, include variations in the serialized product
+    serialized_product['variations'] = []
+
+    for variation in product.variation.all():
+        serialized_variation = {
+            'id': variation.id,
+            'name': variation.name,
+            # Add other variation fields as needed
+        }
+        # Include options associated with this variation
+        serialized_variation['options'] = []
+
+        for option in variation.option.all():
+            serialized_option = {
+                'id': option.id,
+                'name': option.name,
+                # Add other option fields as needed
+            }
+            # Include specifications associated with this option
+            serialized_option['specifications'] = []
+
+            for specification in option.specification.all():
+                serialized_specification = {
+                    'id': specification.id,
+                    'name': specification.name,
+                    # Add other specification fields as needed
+                }
+                serialized_option['specifications'].append(serialized_specification)
+
+            serialized_variation['options'].append(serialized_option)
+
+        serialized_product['variations'].append(serialized_variation)
+
+    return Response(serialized_product)
+
 
 
 @api_view(['GET'])
@@ -126,6 +197,29 @@ def specification_detail(request, product, option_id):
     serialized_specifications = SpecificationSerializer(specifications, many=True).data
     return Response(serialized_specifications)
 
+@api_view(['GET'])
+def specification_detail_individual(request, product, option_id, specification_id):
+    # Get the option instance associated with the provided product ID and option ID
+    option = get_object_or_404(VariationOption, variation__product=product, id=option_id)
+
+    # Get the individual specification associated with the option and specification ID
+    specification = get_object_or_404(VariationSpecification, option=option, id=specification_id)
+
+    # Serialize specification
+    serialized_specification = SpecificationSerializer(specification).data
+    
+    return Response(serialized_specification)
+
+# @api_view(['GET'])
+# def specification_detail_image(request, specification_id):
+
+#     # Get the individual specification associated with the option and specification ID
+#     specification = get_object_or_404(VariationSpecification, id=specification_id)
+
+#     # Serialize specification
+#     serialized_specification = SpecificationSerializer(specification).data
+    
+#     return Response(serialized_specification)
 
 
 

@@ -30,23 +30,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-unsecure-not-secret-key-just-using-this-for-development-purposes"
+# SECRET_KEY = "django-unsecure-not-secret-key-just-using-this-for-development-purposes"
 
-# SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = True
+# DEBUG = True
 
-# DEBUG = os.environ.get("DEBUG", "False").lower() == "True"
+DEBUG = os.environ.get("DEBUG", "False").lower() == "True"
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-# ALLOWED_HOSTS = [
-#     '127.0.0.1'
-#     'localhost',
-#     '127.0.0.1:8000',
-#     'dyopb-backend.onrender.com']
+ALLOWED_HOSTS = [
+    '127.0.0.1'
+    'localhost',
+    '127.0.0.1:8000',
+    'dyopb-backend.onrender.com']
 
 # ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(" ")
 
@@ -172,10 +172,10 @@ DATABASES = {
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'eagfmwsm',
-#         'USER':'eagfmwsm',
-#         'PASSWORD': 'lfufsrp29Lm981uhoak2szuxd7lKr_Qq',
-#         'HOST': 'ziggy.db.elephantsql.com',
+#         'NAME': 'postgres',
+#         'USER':'postgres',
+#         'PASSWORD': 'AVNS_khfC7bLO2POs6GLwVQa',
+#         'HOST': 'dyopb-dyopb.h.aivencloud.com',
 #         'PORT':'5432'
 #     }
 # }

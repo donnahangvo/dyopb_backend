@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.store.api.views import search, variation_list, variation_detail, option_list, option_detail, specification_list, specification_detail, product_list, product_detail, category_list, product_review, category_product
+from apps.store.api.views import search, variation_list, variation_detail, option_list, option_detail, specification_list, specification_detail, specification_detail_individual, product_list, product_detail, category_list, product_review, category_product
 
 # app_name = 'store'
 
@@ -16,6 +16,8 @@ urlpatterns = [
     path('variation/<int:product_id>/', variation_detail, name='variation_list'),
     path('option/<int:product>/<int:variation_id>/', option_detail, name='option_detail'),
     path('specification/<int:product>/<int:option_id>/', specification_detail, name='specification_detail'),
+    path('specification/<int:product>/<int:option_id>/<int:specification_id>/', specification_detail_individual, name='specification_detail_individual'),
+    # path('specification/<int:specification_id>/', specification_detail_image, name='specification_detail_individual'),
 
     path('product/<str:category_slug>/<str:slug>/review/', product_review, name='product_review'),
     # path('product_variation/', product_variation, name='product_variation'),
