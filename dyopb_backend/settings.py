@@ -169,17 +169,6 @@ DATABASES = {
 # database_url = os.environ.get("DATABASE_URL")
 # DATABASES["default"] = dj_database_url.parse(database_url)
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'postgres',
-#         'USER':'postgres',
-#         'PASSWORD': 'AVNS_khfC7bLO2POs6GLwVQa',
-#         'HOST': 'dyopb-dyopb.h.aivencloud.com',
-#         'PORT':'5432'
-#     }
-# }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
