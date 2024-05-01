@@ -30,23 +30,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = "django-unsecure-not-secret-key-just-using-this-for-development-purposes"
+SECRET_KEY = "django-unsecure-not-secret-key-just-using-this-for-development-purposes"
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
+# SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-# DEBUG = True
+DEBUG = True
 
-DEBUG = os.environ.get("DEBUG", "False").lower() == "True"
+# DEBUG = os.environ.get("DEBUG", "False").lower() == "True"
 
-# ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-ALLOWED_HOSTS = [
-    '127.0.0.1'
-    'localhost',
-    '127.0.0.1:8000',
-    'dyopb-backend.onrender.com']
+# ALLOWED_HOSTS = [
+#     '127.0.0.1'
+#     'localhost',
+#     '127.0.0.1:8000',
+#     'dyopb-backend.onrender.com']
 
 # ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(" ")
 
@@ -163,6 +163,19 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.sqlite3'),
+#         'NAME': os.environ.get('DATABASE_NAME', location('db.sqlite')),
+#         'USER': os.environ.get('DATABASE_USER', None),
+#         'PASSWORD': os.environ.get('DATABASE_PASSWORD', None),
+#         'HOST': os.environ.get('DATABASE_HOST', None),
+#         'PORT': os.environ.get('DATABASE_PORT', None),
+#         'ATOMIC_REQUESTS': True
+#     }
+# }
 
 
 # An option for using a different database
